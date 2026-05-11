@@ -1,0 +1,129 @@
+/* Global layout */
+body {
+  margin: 0;
+  font-family: 'Trebuchet MS', sans-serif;
+  background: radial-gradient(circle at top, #1a1a1a, #000);
+  color: #f8f9fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 500px;
+  padding: 20px;
+}
+
+/* Card design */
+.card {
+  background: #111;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(255,0,0,0.6);
+  margin: 20px 0;
+  padding: 25px;
+  text-align: center;
+  border: 2px solid #ff0000;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 25px rgba(255,69,0,0.9);
+}
+
+/* Title card */
+.title-card h1 {
+  font-size: 32px;
+  color: #ff4500;
+  text-shadow: 0 0 15px #ff0000;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #ccc;
+  margin-top: -10px;
+}
+
+/* Profile card */
+.profile-card {
+  font-weight: bold;
+  border-left: 6px solid #ff4500;
+}
+
+#title {
+  margin-top: 10px;
+  font-size: 20px;
+  color: #ffd700;
+  text-shadow: 0 0 10px #ff4500;
+}
+
+/* Inputs */
+input {
+  padding: 10px;
+  margin: 10px;
+  border-radius: 8px;
+  border: 1px solid #ff4500;
+  background: #222;
+  color: #fff;
+  width: 80%;
+  outline: none;
+  transition: 0.3s;
+}
+
+input:focus {
+  border-color: #ffd700;
+  box-shadow: 0 0 10px #ff4500;
+}
+
+/* Buttons */
+button {
+  margin: 10px;
+  padding: 12px;
+  min-width: 140px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(90deg, #ff0000, #ff4500);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 0 10px #ff0000;
+}
+
+button:hover:enabled {
+  background: linear-gradient(90deg, #ff4500, #ff6347);
+  box-shadow: 0 0 15px #ff6347;
+  transform: translateY(-2px);
+}
+
+/* Cooldown & Highscore */
+#cooldown {
+  margin-top: 10px;
+  font-weight: bold;
+  color: #ff6347;
+}
+
+#highscore {
+  margin-top: 15px;
+  font-size: 20px;
+  color: #00ff99;
+  font-weight: bold;
+  text-shadow: 0 0 10px #00ff99;
+}
+
+/* Mobile-friendly */
+@media (max-width: 600px) {
+  .container {
+    max-width: 95%;
+    padding: 10px;
+  }
+  button {
+    min-width: 120px;
+    padding: 10px;
+    font-size: 14px;
+  }
+}

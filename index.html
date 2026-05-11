@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Merge Game - Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card title-card">
+      <h1>🔥 Merge Game 🔥</h1>
+      <p class="subtitle">Enter the arena of chance and power</p>
+    </div>
+
+    <!-- Register -->
+    <div class="card form-card">
+      <h2>Register</h2>
+      <input id="regName" placeholder="Enter username">
+      <button onclick="register()">Register</button>
+    </div>
+
+    <!-- Login -->
+    <div class="card form-card">
+      <h2>Login</h2>
+      <input type="file" id="keyFile">
+      <button onclick="login()">Login</button>
+    </div>
+  </div>
+
+  <script>
+    function register() {
+      const name = document.getElementById("regName").value.trim();
+      if (!name) {
+        alert("Please enter a username!");
+        return;
+      }
+      const data = {
+        username: name,
+        level: 1,
+        exp: 0,
+        points: 1,
+        highscore: 0,
+        failCount: 0
+      };
+      downloadKey(data);
+    }
+
+    function login() {
+      const file = document.getElementById("keyFile").files[0];
+      if (!file) {
+        alert("Please upload your key file!");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          localStorage.setItem("gameData", JSON.stringify(data));
+          window.location.href = "game.html";
+        } catch {
+          alert("Invalid key file!");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function downloadKey(data) {
+      const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "key.json";
+      a.click();
+    }
+  </script>
+</body>
+</html>

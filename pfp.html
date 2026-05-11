@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Profile Settings</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card profile-card">
+      <h2>👤 Profile Settings</h2>
+      <img id="pfp" src="" alt="Profile Picture" style="max-width:120px; border-radius:50%;"><br>
+      <input type="file" id="pfpUpload" accept="image/*" onchange="uploadPfp()">
+    </div>
+
+    <div class="card">
+      <h3>Your Titles</h3>
+      <div id="titlesList"></div>
+    </div>
+
+    <button onclick="goToPage('game.html')">⬅ Back to Game</button>
+    <div class="watermark">© SKPgamez</div>
+  </div>
+
+  <script>
+    let data = JSON.parse(localStorage.getItem("gameData")) || {};
+
+    function saveData() {
+      localStorage.setItem("gameData", JSON.stringify(data));
+    }
+
+    function goToPage(page) {
+      saveData();
+      window.location.href = page;
+    }
+
+    function uploadPfp() {
+      const file = document.getElementById("pfpUpload").files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        data.pfp = e.target.result;
+        document.getElementById("pfp").src = data.pfp;
+        saveData();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function getTitlesUnlocked() {
+      let titles = ["Beginner"];
+      if (data.points >= 500) titles.push("WOW");
+      if (data.points >= 5000) titles.push("Lucky One");
+      if (data.points >= 10000) titles.push("Master Luck");
+      if (data.rebirths > 0) titles.push("Impressive One");
+      if (data.level >= 10) titles.push("Patient Mind");
+      if (data.level >= 20) titles.push("Lucky One");
+      if (data.level >= 50) titles.push("Fate's Favor");
+      return [...new Set(titles)];
+    }
+
+    function renderTitles() {
+      let titles = getTitlesUnlocked();
+      let html = titles.map(t =>
+        `<button onclick="equipTitle('${t}')">${t}</button>`
+      ).join("<br>");
+      document.getElementById("titlesList").innerHTML = html;
+    }
+
+    function equipTitle(title) {
+      data.equippedTitle = title;
+      saveData();
+      alert("Equipped title: " + title);
+    }
+
+    if (data.pfp) document.getElementById("pfp").src = data.pfp;
+    renderTitles();
+  </script>
+</body>
+</html>

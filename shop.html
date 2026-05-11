@@ -44,12 +44,21 @@
       <div id="activeItems"></div>
     </div>
 
-    <a href="game.html"><button>⬅ Back to Game</button></a>
+    <button onclick="goToPage('game.html')">⬅ Back to Game</button>
     <div class="watermark">© SKPgamez</div>
   </div>
 
   <script>
-    let data = JSON.parse(localStorage.getItem("gameData"));
+    let data = JSON.parse(localStorage.getItem("gameData")) || {};
+
+    function saveData() {
+      localStorage.setItem("gameData", JSON.stringify(data));
+    }
+
+    function goToPage(page) {
+      saveData();
+      window.location.href = page;
+    }
 
     function renderShop() {
       document.getElementById("coins").innerHTML = `🪙 Coins: ${data.coins}`;
@@ -62,7 +71,6 @@
       }
       document.getElementById("activeItems").innerHTML = active || "<p>No active items</p>";
 
-      // show cooldown timers
       document.getElementById("cooldownStatus").innerText =
         data.cooldowns.cooldown && Date.now() < data.cooldowns.cooldown
           ? "On cooldown until " + new Date(data.cooldowns.cooldown).toLocaleTimeString()
@@ -94,7 +102,7 @@
         data.activeItems.success = { end: now + 1*60*1000 };
         data.cooldowns.success = now + 30*60*1000;
       }
-      localStorage.setItem("gameData", JSON.stringify(data));
+      saveData();
       renderShop();
     }
 

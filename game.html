@@ -6,7 +6,9 @@
 </head>
 <body>
   <div class="container">
-    <div class="card profile-card">
+    <!-- Profile card redirects to pfp.html -->
+    <div class="card profile-card" onclick="goToPage('pfp.html')">
+      <img id="pfp" src="" alt="Profile Picture" style="max-width:80px; border-radius:50%;">
       <div id="profile"></div>
       <div id="title"></div>
     </div>
@@ -16,14 +18,14 @@
       <button id="mergeBtn" onclick="merge()">🔁 Merge</button>
       <button onclick="logout()">🚪 Logout</button>
       <button id="rebirthBtn" onclick="rebirth()" style="display:none;">✨ Rebirth ✨</button>
-      <a href="shop.html"><button>🛒 Go to Shop</button></a>
+      <button onclick="goToPage('shop.html')">🛒 Go to Shop</button>
       <div id="cooldown"></div>
       <div id="coins"></div>
       <div id="highscore"></div>
     </div>
 
     <div class="card active-card">
-      <h3>Active Items</h3>
+      <h3>Active Buffs</h3>
       <div id="activeItems"></div>
     </div>
 
@@ -33,9 +35,18 @@
   <script>
     let data = JSON.parse(localStorage.getItem("gameData"));
 
+    function saveData() {
+      localStorage.setItem("gameData", JSON.stringify(data));
+    }
+
+    function goToPage(page) {
+      saveData();
+      window.location.href = page;
+    }
+
     function render() {
       document.getElementById("profile").innerHTML =
-        `👤 ${data.username} | Lvl ${data.level} | EXP ${data.exp} | Points ${data.points}`;
+        `👤 ${data.username} | Lvl ${data.level} | EXP ${data.exp} | Points ${data.points} | Rebirths: ${data.rebirths || 0}`;
       document.getElementById("game").innerHTML =
         `Current Points: ${data.points}`;
       document.getElementById("coins").innerHTML =
@@ -43,18 +54,12 @@
       document.getElementById("highscore").innerHTML =
         `🏆 High Score: ${data.highscore}`;
       document.getElementById("title").innerHTML =
-        `🎖 Title: ${getTitle(data.level, data.points, data.rebirths)}`;
+        `🎖 Title: ${data.equippedTitle || "Beginner"}`;
+
+      if (data.pfp) document.getElementById("pfp").src = data.pfp;
 
       document.getElementById("rebirthBtn").style.display =
         data.points >= 1000000 ? "inline-block" : "none";
-
-      let active = "";
-      for (let key in data.activeItems) {
-        if (Date.now() < data.activeItems[key].end) {
-          active += `<p>${key} active</p>`;
-        }
-      }
-      document.getElementById("activeItems").innerHTML = active || "<p>No active items</p>";
     }
 
     function merge() {
@@ -97,10 +102,11 @@
         data.failCount++;
         data.coins += 1 + (data.rebirths || 0);
         if (data.failCount >= 2 && data.points > 1) {
-          data.points /= 2;
+          data.points = Math.max(1, Math.floor(data.points / 2)); // never below 1
           data.failCount = 0;
         }
       }
+      saveData();
       render();
     }
 
@@ -112,22 +118,12 @@
       }
     }
 
-    function getTitle(level, points, rebirths) {
-      if (rebirths > 0) return "Impressive One";
-      if (points >= 10000) return "Master Luck";
-      if (points >= 5000) return "Lucky One";
-      if (points >= 500) return "WOW";
-      if (level >= 50) return "Fate's Favor";
-      if (level >= 20) return "Lucky One";
-      if (level >= 10) return "Patient Mind";
-      return "Beginner";
-    }
-
     function rebirth() {
       if (data.points >= 1000000) {
-        data.points = 1;
+        data.points = 1; // reset to 1 point
         data.rebirths = (data.rebirths || 0) + 1;
-        alert("Rebirth complete! You now gain +" + data.rebirths + " extra coins per fail.");
+        alert("Rebirth complete! You now have " + data.rebirths + " rebirth(s).");
+        saveData();
         render();
       } else {
         alert("You need 1,000,000 points to rebirth!");
@@ -135,14 +131,32 @@
     }
 
     function logout() {
+      // Save everything into key.json
       const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = "key.json";
       a.click();
+
+      // Clear local storage and redirect
       localStorage.removeItem("gameData");
       window.location.href = "index.html";
     }
+
+    // Buff countdown rendering
+    function renderBuffs() {
+      let active = "";
+      for (let key in data.activeItems) {
+        if (Date.now() < data.activeItems[key].end) {
+          const remaining = Math.floor((data.activeItems[key].end - Date.now()) / 1000);
+          active += `<p>${key} active — ${remaining}s left</p>`;
+        }
+      }
+      document.getElementById("activeItems").innerHTML = active || "<p>No active buffs</p>";
+    }
+
+    // Update buffs every second
+    setInterval(renderBuffs, 1000);
 
     render();
   </script>

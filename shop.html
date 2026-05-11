@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Merge Game - Shop</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card shop-card">
+      <h2>🛒 Shop</h2>
+      <p>Spend your coins on powerful boosts!</p>
+      <div id="coins"></div>
+
+      <div class="item-box">
+        <h3>Cooldown Reduction</h3>
+        <p>−2s cooldown for 5 mins</p>
+        <p>Cost: 50 coins</p>
+        <p>Cooldown: 20 mins</p>
+        <button onclick="buyItem('cooldown')">Buy</button>
+        <div id="cooldownStatus"></div>
+      </div>
+
+      <div class="item-box">
+        <h3>2x Multiplier</h3>
+        <p>Double points for 3 mins</p>
+        <p>Cost: 100 coins</p>
+        <p>Cooldown: 30 mins</p>
+        <button onclick="buyItem('multiplier')">Buy</button>
+        <div id="multiplierStatus"></div>
+      </div>
+
+      <div class="item-box">
+        <h3>80% Success Rate</h3>
+        <p>+30% success chance for 1 min</p>
+        <p>Cost: 130 coins</p>
+        <p>Cooldown: 30 mins</p>
+        <button onclick="buyItem('success')">Buy</button>
+        <div id="successStatus"></div>
+      </div>
+    </div>
+
+    <div class="card active-card">
+      <h3>Active Items</h3>
+      <div id="activeItems"></div>
+    </div>
+
+    <a href="game.html"><button>⬅ Back to Game</button></a>
+    <div class="watermark">© SKPgamez</div>
+  </div>
+
+  <script>
+    let data = JSON.parse(localStorage.getItem("gameData"));
+
+    function renderShop() {
+      document.getElementById("coins").innerHTML = `🪙 Coins: ${data.coins}`;
+
+      let active = "";
+      for (let key in data.activeItems) {
+        if (Date.now() < data.activeItems[key].end) {
+          active += `<p>${key} active until ${new Date(data.activeItems[key].end).toLocaleTimeString()}</p>`;
+        }
+      }
+      document.getElementById("activeItems").innerHTML = active || "<p>No active items</p>";
+
+      // show cooldown timers
+      document.getElementById("cooldownStatus").innerText =
+        data.cooldowns.cooldown && Date.now() < data.cooldowns.cooldown
+          ? "On cooldown until " + new Date(data.cooldowns.cooldown).toLocaleTimeString()
+          : "";
+      document.getElementById("multiplierStatus").innerText =
+        data.cooldowns.multiplier && Date.now() < data.cooldowns.multiplier
+          ? "On cooldown until " + new Date(data.cooldowns.multiplier).toLocaleTimeString()
+          : "";
+      document.getElementById("successStatus").innerText =
+        data.cooldowns.success && Date.now() < data.cooldowns.success
+          ? "On cooldown until " + new Date(data.cooldowns.success).toLocaleTimeString()
+          : "";
+    }
+
+    function buyItem(type) {
+      const now = Date.now();
+      if (type === 'cooldown' && data.coins >= 50 && (!data.cooldowns.cooldown || now > data.cooldowns.cooldown)) {
+        data.coins -= 50;
+        data.activeItems.cooldown = { end: now + 5*60*1000 };
+        data.cooldowns.cooldown = now + 20*60*1000;
+      }
+      if (type === 'multiplier' && data.coins >= 100 && (!data.cooldowns.multiplier || now > data.cooldowns.multiplier)) {
+        data.coins -= 100;
+        data.activeItems.multiplier = { end: now + 3*60*1000 };
+        data.cooldowns.multiplier = now + 30*60*1000;
+      }
+      if (type === 'success' && data.coins >= 130 && (!data.cooldowns.success || now > data.cooldowns.success)) {
+        data.coins -= 130;
+        data.activeItems.success = { end: now + 1*60*1000 };
+        data.cooldowns.success = now + 30*60*1000;
+      }
+      localStorage.setItem("gameData", JSON.stringify(data));
+      renderShop();
+    }
+
+    renderShop();
+  </script>
+</body>
+</html>

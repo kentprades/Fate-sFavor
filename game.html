@@ -13,35 +13,59 @@
 
     <div class="card game-card">
       <div id="game"></div>
-      <button id="mergeBtn" onclick="merge()">🔥 Merge 🔥</button>
-      <button onclick="logout()">Logout</button>
+      <button id="mergeBtn" onclick="merge()">🔁 Merge</button>
+      <button onclick="logout()">🚪 Logout</button>
+      <button id="rebirthBtn" onclick="rebirth()" style="display:none;">✨ Rebirth ✨</button>
+      <a href="shop.html"><button>🛒 Go to Shop</button></a>
       <div id="cooldown"></div>
+      <div id="coins"></div>
       <div id="highscore"></div>
     </div>
+
+    <div class="card active-card">
+      <h3>Active Items</h3>
+      <div id="activeItems"></div>
+    </div>
+
+    <div class="watermark">© SKPgamez</div>
   </div>
-
-  <div class="watermark">© SKPgamez</div>
-
 
   <script>
     let data = JSON.parse(localStorage.getItem("gameData"));
-    if (!data.highscore) data.highscore = 0;
-    if (!data.failCount) data.failCount = 0;
 
     function render() {
       document.getElementById("profile").innerHTML =
         `👤 ${data.username} | Lvl ${data.level} | EXP ${data.exp} | Points ${data.points}`;
       document.getElementById("game").innerHTML =
         `Current Points: ${data.points}`;
+      document.getElementById("coins").innerHTML =
+        `🪙 Coins: ${data.coins}`;
       document.getElementById("highscore").innerHTML =
         `🏆 High Score: ${data.highscore}`;
-      document.getElementById("title").innerHTML = `🎖 Title: ${getTitle(data.level)}`;
+      document.getElementById("title").innerHTML =
+        `🎖 Title: ${getTitle(data.level, data.points, data.rebirths)}`;
+
+      document.getElementById("rebirthBtn").style.display =
+        data.points >= 1000000 ? "inline-block" : "none";
+
+      let active = "";
+      for (let key in data.activeItems) {
+        if (Date.now() < data.activeItems[key].end) {
+          active += `<p>${key} active</p>`;
+        }
+      }
+      document.getElementById("activeItems").innerHTML = active || "<p>No active items</p>";
     }
 
     function merge() {
       const btn = document.getElementById("mergeBtn");
+      let cooldownTime = 5;
+      if (data.activeItems.cooldown && Date.now() < data.activeItems.cooldown.end) {
+        cooldownTime = 3;
+      }
+
       btn.disabled = true;
-      let cooldown = 5;
+      let cooldown = cooldownTime;
       document.getElementById("cooldown").innerText = `Cooldown: ${cooldown}s`;
 
       const timer = setInterval(() => {
@@ -54,16 +78,24 @@
         }
       }, 1000);
 
-      if (Math.random() < 0.5) {
-        // success
-        data.points *= 2;
+      let successRate = 0.5;
+      if (data.activeItems.success && Date.now() < data.activeItems.success.end) {
+        successRate = 0.8;
+      }
+
+      if (Math.random() < successRate) {
+        let gain = data.points;
+        if (data.activeItems.multiplier && Date.now() < data.activeItems.multiplier.end) {
+          gain *= 2;
+        }
+        data.points += gain;
         data.exp += 50;
         data.failCount = 0;
         if (data.points > data.highscore) data.highscore = data.points;
         checkLevelUp();
       } else {
-        // fail
         data.failCount++;
+        data.coins += 1 + (data.rebirths || 0);
         if (data.failCount >= 2 && data.points > 1) {
           data.points /= 2;
           data.failCount = 0;
@@ -80,11 +112,26 @@
       }
     }
 
-    function getTitle(level) {
-      if (level >= 50) return "MAXED OUT";
+    function getTitle(level, points, rebirths) {
+      if (rebirths > 0) return "Impressive One";
+      if (points >= 10000) return "Master Luck";
+      if (points >= 5000) return "Lucky One";
+      if (points >= 500) return "WOW";
+      if (level >= 50) return "Fate's Favor";
       if (level >= 20) return "Lucky One";
       if (level >= 10) return "Patient Mind";
       return "Beginner";
+    }
+
+    function rebirth() {
+      if (data.points >= 1000000) {
+        data.points = 1;
+        data.rebirths = (data.rebirths || 0) + 1;
+        alert("Rebirth complete! You now gain +" + data.rebirths + " extra coins per fail.");
+        render();
+      } else {
+        alert("You need 1,000,000 points to rebirth!");
+      }
     }
 
     function logout() {

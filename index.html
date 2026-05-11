@@ -24,9 +24,9 @@
       <input type="file" id="keyFile">
       <button onclick="login()">Login</button>
     </div>
-  </div>
-   <div class="watermark">© SKPgamez</div>
 
+    <div class="watermark">© SKPgamez</div>
+  </div>
 
   <script>
     function register() {
@@ -41,7 +41,11 @@
         exp: 0,
         points: 1,
         highscore: 0,
-        failCount: 0
+        failCount: 0,
+        coins: 0,
+        rebirths: 0,
+        activeItems: {},
+        cooldowns: {}
       };
       downloadKey(data);
     }
@@ -73,7 +77,5 @@
       a.click();
     }
   </script>
-  
 </body>
-
 </html>
